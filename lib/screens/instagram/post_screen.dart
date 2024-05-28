@@ -1,5 +1,8 @@
-import 'package:apiwith_provider/models/user_model.dart';
+import 'dart:developer';
+import 'package:apiwith_provider/components/post_card.dart';
+import 'package:apiwith_provider/models/post_model.dart';
 import 'package:apiwith_provider/provider/post_provider.dart';
+import 'package:apiwith_provider/theme/app_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -13,38 +16,85 @@ class PostsScreen extends StatefulWidget {
 class _PostsScreenState extends State<PostsScreen> {
   late PostProvider provider;
   bool loading = true;
+  Map<int, String> userNames = {};
+  Map<int, String> profileUserName = {};
+  String fullName = '';
+  int postId = 0;
+  int commentsId = 0;
 
   @override
   void initState() {
-    provider = Provider.of<PostProvider>(context, listen: false);
-    provider.getAllUsers().then((value) {
-      setState(() {
-        loading = false;
-      });
-    });
-    //  await provider.getPostApi().then((value) {
-    //     setState(() {
-    //       loading = false;
-    //     });
-    //   });
     super.initState();
+    provider = Provider.of<PostProvider>(context, listen: false);
+    fetchData();
+  }
+
+  Future<void> fetchData() async {
+    await provider.getPostApi().then((value) {
+      for (var item in provider.postmodel) {
+        setState(() {
+          postId = item.userId!;
+        });
+      }
+    });
+    await initPrefs();
+    await initPrefcomments(postId);
+    setState(() {
+      loading = false;
+    });
+  }
+
+  Future<void> initPrefs() async {
+    await provider.getAllUsers().then((value) {
+      for (var item in provider.userModel) {
+        if (item.id != null && item.name != null) {
+          log(item.name.toString(), name: 'name post users');
+          final name = item.name.toString();
+          final userName = item.username.toString();
+          List<String> words = name.split(' ');
+
+          if (words.length >= 2) {
+            String firstNameInitial = words[0][0];
+            String lastNameInitial = words[1][0];
+            fullName = firstNameInitial + lastNameInitial;
+
+            log(fullName, name: 'initial string');
+          }
+          userNames[item.id!] = fullName;
+          profileUserName[item.id!] = userName;
+          // log('User ID: ${item.id}, Name: ${item.name}', name: 'User Data');
+        }
+      }
+    });
+  }
+
+  Future<void> initPrefcomments(int posiId) async {
+    print('call');
+    for (var item in provider.commentModel) {
+      print('call');
+      log(posiId.toString(), name: 'postid');
+      setState(() async {
+        var id = item.postId;
+        log(id.toString(), name: 'id');
+        if (postId == id) {
+          print('true');
+          await provider.getCommentsAPI(posiId);
+        }
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        leading: Container(
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-              image: AssetImage(
-                'assets/images/instgram.png',
-              ),
-            ),
-          ),
+        elevation: 0.0,
+        backgroundColor: Colors.red[900],
+        title: Text(
+          'Instagram',
+          style: boldWhite,
         ),
+        centerTitle: true,
         actions: const [
           Padding(
             padding: EdgeInsets.all(8.0),
@@ -67,43 +117,26 @@ class _PostsScreenState extends State<PostsScreen> {
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Card(
-                  child: Selector<PostProvider, UsersModel?>(
-                selector: (p0, p1) => p1.userModel,
-                builder: (context, user, child) {
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 10,
-                        ),
-                        child: Card(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              CircleAvatar(
-                                child: Text('AV'),
-                              ),
-                              SizedBox(width: 10),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(user?.name ?? 'no name'),
-                                  Text('29/01/2020'),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      Icon(Icons.more_vert)
-                    ],
-                  );
-                },
-              )),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Selector<PostProvider, List<PostsModel>>(
+                  selector: (p0, p1) => p1.postmodel,
+                  builder: (context, post, child) {
+                    return ListView.builder(
+                      itemCount: post.length,
+                      itemBuilder: (context, index) {
+                        var postItem = post[index];
+                        var userId = postItem.userId;
+                        var userName = userNames[userId] ?? 'No name';
+                        var postname = profileUserName[userId] ?? 'No name';
+                        return PostCard(
+                          name: userName,
+                          postbody: postItem.body ?? 'no body',
+                          userId: postItem.userId ?? 0,
+                          userName: postname,
+                        );
+                      },
+                    );
+                  }),
             ),
     );
   }

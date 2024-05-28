@@ -1,96 +1,77 @@
-class UsersModel {
-    final int id;
-    final String name;
-    final String username;
-    final String email;
-    final Address address;
-    final String phone;
-    final String website;
-    final Company company;
+class UserModel {
+  int? id;
+  String? name;
+  String? username;
+  String? email;
+  Address? address;
+  String? phone;
+  String? website;
+  Company? company;
 
-    UsersModel({
-        required this.id,
-        required this.name,
-        required this.username,
-        required this.email,
-        required this.address,
-        required this.phone,
-        required this.website,
-        required this.company,
-    });
+  UserModel(
+      {this.id,
+      this.name,
+      this.username,
+      this.email,
+      this.address,
+      this.phone,
+      this.website,
+      this.company});
 
-    factory UsersModel.fromJson(Map<String, dynamic> json) => UsersModel(
-        id: json["id"],
-        name: json["name"],
-        username: json["username"],
-        email: json["email"],
-        address: Address.fromJson(json["address"]),
-        phone: json["phone"],
-        website: json["website"],
-        company: Company.fromJson(json["company"]),
-    );
-
-
+  UserModel.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    name = json['name'];
+    username = json['username'];
+    email = json['email'];
+    address =
+        json['address'] != null ? Address.fromJson(json['address']) : null;
+    phone = json['phone'];
+    website = json['website'];
+    company =
+        json['company'] != null ? Company.fromJson(json['company']) : null;
+  }
 }
 
 class Address {
-    final String street;
-    final String suite;
-    final String city;
-    final String zipcode;
-    final Geo geo;
+  String? street;
+  String? suite;
+  String? city;
+  String? zipcode;
+  Geo? geo;
 
-    Address({
-        required this.street,
-        required this.suite,
-        required this.city,
-        required this.zipcode,
-        required this.geo,
-    });
+  Address({this.street, this.suite, this.city, this.zipcode, this.geo});
 
-    factory Address.fromJson(Map<String, dynamic> json) => Address(
-        street: json["street"],
-        suite: json["suite"],
-        city: json["city"],
-        zipcode: json["zipcode"],
-        geo: Geo.fromJson(json["geo"]),
-    );
-
-   
+  Address.fromJson(Map<String, dynamic> json) {
+    street = json['street'];
+    suite = json['suite'];
+    city = json['city'];
+    zipcode = json['zipcode'];
+    geo = json['geo'] != null ? Geo.fromJson(json['geo']) : null;
+  }
 }
 
 class Geo {
-    final String lat;
-    final String lng;
+  String? lat;
+  String? lng;
 
-    Geo({
-        required this.lat,
-        required this.lng,
-    });
+  Geo({this.lat, this.lng});
 
-    factory Geo.fromJson(Map<String, dynamic> json) => Geo(
-        lat: json["lat"],
-        lng: json["lng"],
-    );
-
-    
+  Geo.fromJson(Map<String, dynamic> json) {
+    lat = json['lat'];
+    lng = json['lng'];
+  }
 }
 
 class Company {
-    final String name;
-    final String catchPhrase;
-    final String bs;
+  String? name;
+  String? catchPhrase;
+  String? bs;
 
-    Company({
-        required this.name,
-        required this.catchPhrase,
-        required this.bs,
-    });
+  Company({this.name, this.catchPhrase, this.bs});
 
-    factory Company.fromJson(Map<String, dynamic> json) => Company(
-        name: json["name"],
-        catchPhrase: json["catchPhrase"],
-        bs: json["bs"],
-    );
-
+  Company.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
+    catchPhrase = json['catchPhrase'];
+    bs = json['bs'];
+  }
 }
